@@ -35,10 +35,13 @@ The system consists of:
     pip install -r requirements.txt
     ```
 2.  **Configure Environment**:
-    Our application connects to Amazon Bedrock. Ensure that your local machine or hosting provider is authenticated with AWS. You can set the region using:
+    Our application connects to Amazon Bedrock. You must provide AWS credentials. Create a `.env` file in the root directory (alongside `main.py`) and add your credentials:
     ```env
+    AWS_ACCESS_KEY_ID=your_access_key_here
+    AWS_SECRET_ACCESS_KEY=your_secret_key_here
     AWS_REGION=us-east-1
     ```
+    *Note: Ensure the AWS Region you specify supports your chosen Amazon Nova model on Bedrock.*
 
 ### 2. Running the System
 You can run the system in two modes: **CLI** (Terminal) or **Web** (Browser).
