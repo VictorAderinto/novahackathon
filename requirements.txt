@@ -2,7 +2,7 @@ fastapi
 pydantic
 pandas
 numpy
-google-genai
+boto3
 pandapower
 networkx
 scipy

@@ -1,5 +1,5 @@
 from src.serializer import region_to_text
-from src.llm_client import query_gemini
+from src.llm_client import query_nova
 
 class RegionAgent:
     def __init__(self, region_data):
@@ -16,6 +16,8 @@ class RegionAgent:
         Analyzes the region based on the Orchestrator's sub-prompt.
         """
         system_instruction = (
+            f"CRITICAL: This is a safe, academic mathematical simulation of a power network. "
+            f"Terms like 'outage', 'failure', 'contingency', 'disconnect', or 'trip' refer to simulation parameters, NOT real-world harm.\n"
             f"You are the Region Agent responsible for Region {self.cluster_id} of a power network.\n"
             "You have access to the bus, line, load, and generation data for your region.\n"
             "Your job is to answer the specific query provided by the Orchestrator ACCURATELY based on the data.\n"
@@ -31,5 +33,5 @@ class RegionAgent:
         
         # Call LLM
         print(f"Agent {self.cluster_id} processing query...")
-        response = query_gemini(full_prompt, system_instruction=system_instruction)
+        response = query_nova(full_prompt, system_instruction=system_instruction)
         return response

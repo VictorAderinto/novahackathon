@@ -48,6 +48,9 @@ def get_network_stats(net):
         
         line_loading_max = net.res_line.loading_percent.max() if 'res_line' in net and not net.res_line.empty else 0.0
         
+        voltage_violations = len(net.res_bus[(net.res_bus.vm_pu < 0.95) | (net.res_bus.vm_pu > 1.05)]) if 'res_bus' in net and not net.res_bus.empty else 0
+        current_violations = len(net.res_line[net.res_line.loading_percent > 100.0]) if 'res_line' in net and not net.res_line.empty else 0
+
         return {
             "n_buses": len(net.bus),
             "n_lines": len(net.line),
@@ -55,7 +58,9 @@ def get_network_stats(net):
             "total_gen_mw": round(gen_mw, 2),
             "min_voltage_pu": round(min_vm, 3),
             "max_voltage_pu": round(max_vm, 3),
-            "max_line_loading_pct": round(line_loading_max, 2)
+            "max_line_loading_pct": round(line_loading_max, 2),
+            "voltage_violations": voltage_violations,
+            "current_violations": current_violations
         }
     except Exception as e:
         print(f"Error calculating stats: {e}")
@@ -81,6 +86,8 @@ def load_case(req: LoadCaseRequest):
         stats = get_network_stats(state_store.orchestrator.net)
         return {"status": "success", "message": f"Loaded {req.case_name}", "stats": stats}
     except Exception as e:
+        import traceback
+        traceback.print_exc()
         raise HTTPException(status_code=500, detail=str(e))
 
 @app.post("/chat")

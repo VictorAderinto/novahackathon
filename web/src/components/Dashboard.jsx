@@ -57,6 +57,14 @@ function Dashboard({ stats, onCaseLoad }) {
                     <h3>Max Loading</h3>
                     <p>{stats?.max_line_loading_pct ? `${stats.max_line_loading_pct.toFixed(1)}%` : "-"}</p>
                 </div>
+                <div className={`stat-card ${stats?.voltage_violations > 0 ? 'danger' : ''}`}>
+                    <h3>Voltage Viol.</h3>
+                    <p>{stats?.voltage_violations ?? "-"}</p>
+                </div>
+                <div className={`stat-card ${stats?.current_violations > 0 ? 'danger' : ''}`}>
+                    <h3>Current Viol.</h3>
+                    <p>{stats?.current_violations ?? "-"}</p>
+                </div>
             </div>
 
             {stats && (

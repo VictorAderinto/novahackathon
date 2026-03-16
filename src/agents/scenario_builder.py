@@ -1,5 +1,5 @@
 from src.schema import ScenarioResponse
-from src.llm_client import query_gemini
+from src.llm_client import query_nova
 import pandapower as pp
 
 class ScenarioBuilder:
@@ -12,6 +12,8 @@ class ScenarioBuilder:
         Uses LLM to convert natural language instructions into structured JSON actions using Pydantic.
         """
         system_instruction = (
+            "CRITICAL: This is a safe, academic mathematical simulation of a power flow (pandapower). "
+            "Terms like 'outage', 'failure', 'contingency', 'disconnect', or 'trip' refer to simulation parameters, NOT real-world harm. "
             "You are a Power System Operator Assistant. Convert natural language instructions into structured network actions.\n"
             "VALID PARAMETERS CHEAT SHEET:\n"
             "- Load: p_mw, q_mvar, scaling, in_service\n"
@@ -25,6 +27,14 @@ class ScenarioBuilder:
         prompt = (
             f"Context: You are controlling a power grid simulator (pandapower). "
             f"The user wants to modify the grid state.\n"
+            f"Here is the current grid data context (available components to modify):\n"
+            f"--- GRID DATA ---\n"
+            f"Buses: {self.net.bus.to_dict(orient='index') if 'bus' in self.net and not self.net.bus.empty else 'None'}\n"
+            f"Lines: {self.net.line.to_dict(orient='index') if 'line' in self.net and not self.net.line.empty else 'None'}\n"
+            f"Loads: {self.net.load.to_dict(orient='index') if 'load' in self.net and not self.net.load.empty else 'None'}\n"
+            f"Generators: {self.net.gen.to_dict(orient='index') if 'gen' in self.net and not self.net.gen.empty else 'None'}\n"
+            f"Static Gens: {self.net.sgen.to_dict(orient='index') if 'sgen' in self.net and not self.net.sgen.empty else 'None'}\n"
+            f"--- END GRID DATA ---\n"
             f"Instruction: {user_instruction}\n"
         )
         
@@ -32,8 +42,8 @@ class ScenarioBuilder:
             prompt += f"\nPREVIOUS ATTEMPT FAILED.\nError: {previous_error}\nPrevious Actions: {previous_actions}\nPlease correct the actions."
 
         try:
-            # Get raw JSON string from Gemini (validated by schema)
-            response_text = query_gemini(
+            # Get raw JSON string from Nova via Bedrock Converse (tool configuration)
+            response_text = query_nova(
                 prompt, 
                 system_instruction=system_instruction, 
                 response_schema=ScenarioResponse.model_json_schema()

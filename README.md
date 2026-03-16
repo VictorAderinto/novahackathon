@@ -1,9 +1,9 @@
 # Geo-Spatial Power Grid Agent System
 
-**Powered by Google Gemini 3**
+**Powered by Amazon Nova**
 
 ## ⚡ Project Overview
-This project demonstrates a next-generation **Agentic Power Grid Management System**. It leverages **Google Gemini 3** to orchestrate a team of specialized AI agents that monitor, analyze, and control different regions of a power grid (IEEE Case 57).
+This project demonstrates a next-generation **Agentic Power Grid Management System**. It leverages **Amazon Nova** via AWS Bedrock to orchestrate a team of specialized AI agents that monitor, analyze, and control different regions of a power grid (IEEE Case 57).
 
 Traditional power grid management is often siloed and reactive. This system introduces a **proactive, decentralized AI architecture** where regional agents collaborate to solve complex grid problems (like overloads or voltage violations) under the supervision of a central Orchestrator.
 
@@ -11,7 +11,7 @@ Traditional power grid management is often siloed and reactive. This system intr
 - **Multi-Agent Architecture**: A "Map-Reduce" style agent system where `RegionAgents` analyze local data and an `Orchestrator` synthesizes global decisions.
 - **Natural Language Control**: Operators can interact with the grid using natural language (e.g., *"Simulate an outage on Bus 5 and tell me if the grid is stable"*).
 - **Real-time Simulation**: Integrated with `pandapower` for accurate power flow calculations.
-- **Gemini 3 Integration**: Utilizes the latest Gemini models for high-speed reasoning and structured data processing.
+- **Amazon Nova Integration**: Utilizes the latest Nova 2 models (e.g., Nova 2 Lite) for high-speed reasoning and robust structured data processing via AWS Bedrock Converse API.
 
 ## 🛠️ Architecture
 The system consists of:
@@ -27,7 +27,7 @@ The system consists of:
 ### Prerequisites
 - Python 3.10+
 - Node.js 16+
-- Google Cloud API Key (with Gemini access)
+- AWS Credentials (e.g. `~/.aws/credentials` configured, or `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`, and `AWS_REGION` exposed to the environment)
 
 ### 1. Backend Setup (Required for both CLI and Web)
 1.  **Install Dependencies**:
@@ -35,9 +35,9 @@ The system consists of:
     pip install -r requirements.txt
     ```
 2.  **Configure Environment**:
-    Create a `.env` file in the root directory and add your Google Cloud API key:
+    Our application connects to Amazon Bedrock. Ensure that your local machine or hosting provider is authenticated with AWS. You can set the region using:
     ```env
-    GOOGLE_API_KEY=your_key_here
+    AWS_REGION=us-east-1
     ```
 
 ### 2. Running the System
@@ -54,7 +54,7 @@ You need to run both the Backend API and the Frontend (in separate terminals).
 
 **Terminal 1: Backend API**
 ```bash
-uvicorn src.api.main:app --reload
+python -m uvicorn src.api.main:app --reload
 ```
 *The API will start at http://127.0.0.1:8000*
 

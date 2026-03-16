@@ -1,47 +1,87 @@
 import os
-from google import genai
+import boto3
 from dotenv import load_dotenv
 
 # Load env variables
 load_dotenv()
 
-API_KEY = os.getenv("GOOGLE_API_KEY")
+# We configure Bedrock runtime client. Boto3 will automatically look for
+# AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, and AWS_REGION in env vars or ~/.aws/credentials.
+# Defaulting to us-east-1 for Nova models if region is not set, though it should ideally be set in the environment.
 
-if not API_KEY:
-    print("WARNING: GOOGLE_API_KEY not found in environment variables.")
+aws_region = os.getenv("AWS_REGION", "us-east-1")
+try:
+    client = boto3.client("bedrock-runtime", region_name=aws_region)
+except Exception as e:
+    print(f"WARNING: Could not initialize Bedrock client. Ensure AWS credentials are set: {e}")
 
-# Configure the library
-client = genai.Client(api_key=API_KEY)
-
-def query_gemini(prompt, system_instruction=None, model_name="gemini-3-flash-preview", response_schema=None):
+def query_nova(prompt, system_instruction=None, model_name="us.amazon.nova-2-lite-v1:0", response_schema=None):
     """
-    Sends a prompt to Gemini and returns the text response.
-    Supports structured output if response_schema is provided.
+    Sends a prompt to Amazon Nova via AWS Bedrock Converse API and returns the text response.
+    Supports structured output instructions if response_schema is provided.
     """
     try:
-        if system_instruction:
-            # Native system instruction support if available in this client version, 
-            # but sticking to prompt prepend for safety unless we see config options.
-            # actually, let's stick to prompt prepending for now as it worked, 
-            # BUT if we use response_schema, ensure it's compatible.
-            final_prompt = f"System Instruction: {system_instruction}\n\nUser Prompt: {prompt}"
-        else:
-            final_prompt = prompt
+        messages = [
+            {
+                "role": "user",
+                "content": [{"text": prompt}]
+            }
+        ]
 
-        config = {}
+        system_prompts = []
+        if system_instruction:
+            system_prompts.append({"text": system_instruction})
+
+        # Tool configuration for structured output via Converse API
+        tool_config = None
         if response_schema:
-            config = {
-                "response_mime_type": "application/json",
-                "response_json_schema": response_schema
+            # We wrap the Pydantic JSON schema into an AWS Bedrock tool config
+            # Nova will be forced to output this structure.
+            tool_config = {
+                "tools": [
+                    {
+                        "toolSpec": {
+                            "name": "structured_output",
+                            "description": "Output the mandatory structured JSON response exactly matching this schema.",
+                            "inputSchema": {
+                                "json": response_schema
+                            }
+                        }
+                    }
+                ],
+                "toolChoice": {
+                    "tool": {
+                        "name": "structured_output"
+                    }
+                }
             }
 
-        response = client.models.generate_content(
-            model=model_name,
-            contents=final_prompt,
-            config=config if config else None
-        )
+        args = {
+            "modelId": model_name,
+            "messages": messages,
+            "inferenceConfig": {"temperature": 0.3}
+        }
+
+        if system_prompts:
+            args["system"] = system_prompts
+
+        if tool_config:
+            args["toolConfig"] = tool_config
+
+        response = client.converse(**args)
         
-        return response.text
+        # If we asked for structured output, the response will be a tool use block
+        if tool_config:
+             for content_block in response['output']['message']['content']:
+                 if 'toolUse' in content_block:
+                     # Return the raw JSON dictionary returned by the tool as a string,
+                     # to match the previous gemini `response_text` behavior for Pydantic parsing
+                     import json
+                     return json.dumps(content_block['toolUse']['input'])
+             return "Error: Model did not use the structured output tool."
+        else:
+             # Standard text response
+             return response['output']['message']['content'][0]['text']
 
     except Exception as e:
-        return f"Error querying Gemini: {str(e)}"
+        return f"Error querying Amazon Nova: {str(e)}"

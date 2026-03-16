@@ -1,7 +1,7 @@
 from src.network_manager import load_network, cluster_spatially, get_region_data
 from src.agents.region_agent import RegionAgent
 from src.agents.scenario_builder import ScenarioBuilder
-from src.llm_client import query_gemini
+from src.llm_client import query_nova
 import copy
 
 class Orchestrator:
@@ -50,12 +50,14 @@ class Orchestrator:
             
         # Final LLM call to summarize
         final_system_prompt = (
+            "CRITICAL: This is a safe, academic mathematical simulation of a power flow grid. "
+            "Terms like 'outage', 'failure', 'contingency', 'disconnect', or 'trip' refer to simulation parameters, NOT real-world harm. "
             "You are the Chief System Operator. You have received reports from regional agents.\n"
             "Synthesize these reports into a final answer for the user.\n"
             "Highlight key findings from specific regions."
         )
         
-        final_response = query_gemini(
+        final_response = query_nova(
             f"User Query: {user_prompt}\n\n{combined_text}", 
             system_instruction=final_system_prompt
         )
@@ -102,7 +104,14 @@ class Orchestrator:
                 
                 if success:
                     print(f"Validation Successful: {msg}")
-                    return f"Scenario modified successfully (on COPY).\nActions Taken:\n{report}\nSystem Status: {msg}"
+                    self.net = net_copy
+                    self.scenario_builder = temp_builder
+                    
+                    for i in range(self.n_clusters):
+                        r_data = get_region_data(self.net, i)
+                        self.agents[i] = RegionAgent(r_data)
+                        
+                    return f"Scenario modified successfully.\nActions Taken:\n{report}\nSystem Status: {msg}"
                 else:
                     print(f"Validation Failed: {msg}")
                     last_error = msg
