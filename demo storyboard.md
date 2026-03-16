@@ -9,7 +9,7 @@
 **🗣️ Say:**
 > "Power grids are becoming increasingly complex with renewable energy and EV loads. When a line fails today, operators often rely on static tools and manual calculations, leading to cascading blackouts.
 >
-> We built a system that uses **Gemini 3** to not just *monitor* the grid, but to *understand* it. Let me show you how our multi-agent system manages an IEEE 57-bus network."
+> We built a system that uses **Amazon Nova** to not just *monitor* the grid, but to *understand* it. Let me show you how our multi-agent system manages an IEEE 57-bus network."
 
 ---
 

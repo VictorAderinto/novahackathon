@@ -4,7 +4,7 @@ import { Send, Bot, User } from 'lucide-react';
 
 function ChatInterface({ onSendMessage, isProcessing }) {
     const [messages, setMessages] = useState([
-        { role: 'system', text: "Welcome to the **Power System Gemini Helper**. Load a case to begin." }
+        { role: 'system', text: "Welcome to the **Power System Nova Helper**. Load a case to begin." }
     ]);
     const [input, setInput] = useState("");
     const messagesEndRef = useRef(null);
@@ -39,7 +39,7 @@ function ChatInterface({ onSendMessage, isProcessing }) {
     return (
         <div className="chat-panel">
             <div className="chat-header">
-                <h2><Bot size={20} color="#8b5cf6" /> Gemini Assistant</h2>
+                <h2><Bot size={20} color="#8b5cf6" /> Nova Assistant</h2>
             </div>
 
             <div className="messages-container">

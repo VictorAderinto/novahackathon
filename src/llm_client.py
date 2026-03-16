@@ -75,7 +75,7 @@ def query_nova(prompt, system_instruction=None, model_name="us.amazon.nova-2-lit
              for content_block in response['output']['message']['content']:
                  if 'toolUse' in content_block:
                      # Return the raw JSON dictionary returned by the tool as a string,
-                     # to match the previous gemini `response_text` behavior for Pydantic parsing
+                     # to match the expected response_text behavior for Pydantic parsing
                      import json
                      return json.dumps(content_block['toolUse']['input'])
              return "Error: Model did not use the structured output tool."

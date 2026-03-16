@@ -2,7 +2,7 @@ graph TD
     User[User / Operator] -->|Natural Language| UI[React Frontend]
     UI -->|API Request| API[FastAPI Orchestrator]
     
-    subgraph "Agentic Core (Powered by Gemini 3)"
+    subgraph "Agentic Core (Powered by Amazon Nova)"
         API -->|Delegates| Orch[Orchestrator Agent]
         Orchestrator -->|Queries| SB[Scenario Builder]
         Orchestrator -->|Map-Reduce| RA1[Region 0 Agent]
